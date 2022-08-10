@@ -59,18 +59,22 @@ class SmolListener(tweepy.StreamingClient):
                     # Fetch for reply
                     referencedText = referencedTweet[1]['tweets'][0].text
                     taggedPerson = referencedTweet[1]['users'][1].username
+                    if taggedPerson == "smolquote":
+                        print('Reply to smolquote, close')
+                        return
+                    print(f'Is reply')
                 except:
-                    print(f'Is not reply, trying for retweet')
                     try:
                         # Fetch for retweet
                         referencedText = referencedTweet[1]['tweets'][0].text
                         taggedPerson = referencedTweet[1]['users'][0].username
+                        print(f'Is retweet')
                     except:
-                        print(f'Is not retweet, trying for post')
                         try:
                             # Fetch for post
                             referencedText = referencedTweet.data.text.replace("@smolquote", "")
                             taggedPerson = referencedTweet[1]['users'][0].username
+                            print(f'is post')
                         except:
                             print(f'Is not post also, raise exception')
                             raise Exception("Not post or reply")
@@ -94,7 +98,7 @@ class SmolListener(tweepy.StreamingClient):
 
 stream = SmolListener()
 
-stream.add_rules(tweepy.StreamRule("@smolquote"))
+stream.add_rules(tweepy.StreamRule("(@smolquote)"))
 stream.filter(expansions="author_id")
 
 print("Smol Quote Running...")
