@@ -39,15 +39,35 @@ class SmolListener(tweepy.StreamingClient):
     def on_data(self, raw_data):
         print(f'Received: {raw_data}')
         try:
-            replyID = json.loads(raw_data.decode("utf-8"))['data']['id']
+            jsoned = json.loads(raw_data.decode("utf-8"))
+            replyID = jsoned['data']['id']
+            authorName = jsoned['includes']['users'][0]['username']
+
+            if authorName == 'smolquote':
+                print('Self tag, close')
+                return
+
             referencedTweet = api.get_tweet(
                 id=replyID,
                 user_auth=True,
-                expansions=["referenced_tweets.id", "in_reply_to_user_id"]
+                expansions=["referenced_tweets.id", "in_reply_to_user_id", "author_id"]
             )
             try:
-                referencedText = referencedTweet[1]['tweets'][0].text
-                taggedPerson = referencedTweet[1]['users'][0].username
+                referencedText = ""
+                taggedPerson = ""
+                try:
+                    # Fetch for reply
+                    referencedText = referencedTweet[1]['tweets'][0].text
+                    taggedPerson = referencedTweet[1]['users'][1].username
+                except:
+                    print(f'Is not reply, trying post')
+                    try:
+                        # Fetch for post
+                        referencedText = referencedTweet.data.text.replace("@smolquote", "")
+                        taggedPerson = referencedTweet[1]['users'][0].username
+                    except:
+                        print(f'Is not post also, raise exception')
+                        raise Exception("Not post or reply")
 
                 api.create_tweet(
                     text=f'“{translate(referencedText)}” - @{taggedPerson}\n\n#wassieverse',
@@ -64,6 +84,6 @@ class SmolListener(tweepy.StreamingClient):
 stream = SmolListener()
 
 stream.add_rules(tweepy.StreamRule("@smolquote"))
-stream.filter()
+stream.filter(expansions="author_id")
 
 print("Smol Quote Running...")
