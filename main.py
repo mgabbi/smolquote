@@ -60,14 +60,20 @@ class SmolListener(tweepy.StreamingClient):
                     referencedText = referencedTweet[1]['tweets'][0].text
                     taggedPerson = referencedTweet[1]['users'][1].username
                 except:
-                    print(f'Is not reply, trying post')
+                    print(f'Is not reply, trying for retweet')
                     try:
-                        # Fetch for post
-                        referencedText = referencedTweet.data.text.replace("@smolquote", "")
+                        # Fetch for retweet
+                        referencedText = referencedTweet[1]['tweets'][0].text
                         taggedPerson = referencedTweet[1]['users'][0].username
                     except:
-                        print(f'Is not post also, raise exception')
-                        raise Exception("Not post or reply")
+                        print(f'Is not retweet, trying for post')
+                        try:
+                            # Fetch for post
+                            referencedText = referencedTweet.data.text.replace("@smolquote", "")
+                            taggedPerson = referencedTweet[1]['users'][0].username
+                        except:
+                            print(f'Is not post also, raise exception')
+                            raise Exception("Not post or reply")
 
                 newTweetText = f'“{translate(referencedText)}” - @{taggedPerson}\n\n#wassieverse'
 
