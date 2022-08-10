@@ -21,8 +21,9 @@ for x in jsonLang:
 
 
 def translate(sentence):
-    linksRemoved = [re.sub(r'http\S+', '', x) for x in sentence.split()]
-    return " ".join([smolLang.get(x, x) for x in linksRemoved if x != ''])
+    linksRemoved = [re.sub(r'http\S+', '', x).lower() for x in sentence.split()]
+    transformed = " ".join([smolLang.get(x, x) for x in linksRemoved if x != ''])
+    return transformed.replace("imp", "inp")
 
 
 api = tweepy.Client(consumer_key=os.environ.get("API_KEY"),
