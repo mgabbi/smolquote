@@ -64,3 +64,5 @@ stream = SmolListener()
 
 stream.add_rules(tweepy.StreamRule("@smolquote"))
 stream.filter()
+
+print("Smol Quote Running...")
