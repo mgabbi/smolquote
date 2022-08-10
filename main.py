@@ -69,8 +69,13 @@ class SmolListener(tweepy.StreamingClient):
                         print(f'Is not post also, raise exception')
                         raise Exception("Not post or reply")
 
+                newTweetText = f'“{translate(referencedText)}” - @{taggedPerson}\n\n#wassieverse'
+
+                if len(newTweetText) > 280:
+                    newTweetText = f'aw smoltext bekom too long. ~_~\n\n#wassieverse'
+
                 api.create_tweet(
-                    text=f'“{translate(referencedText)}” - @{taggedPerson}\n\n#wassieverse',
+                    text=newTweetText,
                     in_reply_to_tweet_id=replyID
                 )
             except Exception as err:
