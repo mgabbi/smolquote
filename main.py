@@ -21,7 +21,11 @@ for x in jsonLang:
 
 
 def translate(sentence):
-    linksRemoved = [re.sub(r'http\S+', '', x).lower() for x in sentence.split(sep=" ")]
+    linksRemoved = [
+        re.sub(
+            "(#[A-Za-z0-9]+)|(@[A-Za-z0-9]+)|([^0-9A-Za-z \'\t])|(\w+:\/\/\S+)|(www.\S+)",
+            '',
+            x).lower() for x in sentence.split(sep=" ")]
     transformed = " ".join([smolLang.get(x, x) for x in linksRemoved if x != ''])
     return transformed.replace("imp", "inp")
 
@@ -62,19 +66,20 @@ class SmolListener(tweepy.StreamingClient):
                     if taggedPerson == "smolquote":
                         print('Reply to smolquote, close')
                         return
-                    print(f'Is reply')
+                    print(f'Is reply - {referencedText}')
                 except:
                     try:
-                        # Fetch for retweet
-                        referencedText = referencedTweet[1]['tweets'][0].text
+                        # Fetch for post
+                        referencedText = referencedTweet.data.text.replace("@smolquote", "")
                         taggedPerson = referencedTweet[1]['users'][0].username
-                        print(f'Is retweet')
+                        print(f'Is post - {referencedText}')
                     except:
                         try:
-                            # Fetch for post
-                            referencedText = referencedTweet.data.text.replace("@smolquote", "")
+                            # Fetch for retweet
+                            referencedText = referencedTweet[1]['tweets'][0].text
                             taggedPerson = referencedTweet[1]['users'][0].username
-                            print(f'is post')
+                            print(f'Is retweet, close - {referencedText}')
+                            return
                         except:
                             print(f'Is not post also, raise exception')
                             raise Exception("Not post or reply")
