@@ -109,7 +109,7 @@ class SmolListener(tweepy.StreamingClient):
                         in_reply_to_tweet_id=replyID
                     )
                 else:
-                    asyncio.run(sendImage(api, apiV1, newTweetText, taggedPerson, replyID))
+                    asyncio.run(sendImage(api, apiV1, newTweetText, f'@{taggedPerson}', replyID))
             except Exception as err:
                 print(f'CRASH >>> {err}')
 
