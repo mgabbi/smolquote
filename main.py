@@ -26,8 +26,8 @@ def translate(sentence):
             "(#[A-Za-z0-9]+)|(@[A-Za-z0-9]+)|([^0-9A-Za-z \n\'])|(\w+:\/\/\S+)|(www.\S+)",
             '',
             x).lower() for x in sentence.split(sep=" ")]
-    transformed = " ".join([smolLang.get(x, x) for x in linksRemoved if x != ''])
-    return transformed.replace("imp", "inp")
+    return " ".join([smolLang.get(x, x) for x in linksRemoved if x != '']) \
+        .strip().replace("imp", "inp")
 
 
 api = tweepy.Client(consumer_key=os.environ.get("API_KEY"),
