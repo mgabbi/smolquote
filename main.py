@@ -26,7 +26,7 @@ for x in jsonLang:
 def translate(sentence):
     linksRemoved = [
         re.sub(
-            "(@[A-Za-z0-9]+)|([^0-9A-Za-z \n\'])|(\w+:\/\/\S+)|(www.\S+)",
+            "(@[A-Za-z0-9]+)|([^0-9A-Za-z #\n\'])|(\w+:\/\/\S+)|(www.\S+)",
             '',
             x).lower() for x in sentence.split(sep=" ")]
     return " ".join(
