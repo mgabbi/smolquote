@@ -23,7 +23,7 @@ for x in jsonLang:
 def translate(sentence):
     linksRemoved = [
         re.sub(
-            "(#[A-Za-z0-9]+)|(@[A-Za-z0-9]+)|([^0-9A-Za-z \'\t])|(\w+:\/\/\S+)|(www.\S+)",
+            "(#[A-Za-z0-9]+)|(@[A-Za-z0-9]+)|([^0-9A-Za-z \'])|(\w+:\/\/\S+)|(www.\S+)",
             '',
             x).lower() for x in sentence.split(sep=" ")]
     transformed = " ".join([smolLang.get(x, x) for x in linksRemoved if x != ''])
