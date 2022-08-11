@@ -23,7 +23,7 @@ for x in jsonLang:
 def translate(sentence):
     linksRemoved = [
         re.sub(
-            "(#[A-Za-z0-9]+)|(@[A-Za-z0-9]+)|([^0-9A-Za-z \n\'])|(\w+:\/\/\S+)|(www.\S+)",
+            "(@[A-Za-z0-9]+)|([^0-9A-Za-z \n\'])|(\w+:\/\/\S+)|(www.\S+)",
             '',
             x).lower() for x in sentence.split(sep=" ")]
     return " ".join(
@@ -42,15 +42,11 @@ class SmolListener(tweepy.StreamingClient):
         super().__init__(bearer_token=os.environ.get("BEARER"))
 
     def on_data(self, raw_data):
-        print(f'Received: {raw_data}')
+        print(f'NEW TWEET >>> {raw_data.decode("utf-8")}')
         try:
             jsoned = json.loads(raw_data.decode("utf-8"))
             replyID = jsoned['data']['id']
             authorName = jsoned['includes']['users'][0]['username']
-
-            if authorName == 'smolquote':
-                print('Self tag, close')
-                return
 
             referencedTweet = api.get_tweet(
                 id=replyID,
@@ -58,53 +54,57 @@ class SmolListener(tweepy.StreamingClient):
                 expansions=["referenced_tweets.id", "in_reply_to_user_id", "author_id"]
             )
             try:
-                referencedText = ""
-                taggedPerson = ""
                 try:
-                    # Fetch for reply
-                    referencedText = referencedTweet[1]['tweets'][0].text
-                    taggedPerson = referencedTweet[1]['users'][1].username
-                    if taggedPerson == "smolquote":
-                        print('Reply to smolquote, close')
-                        return
-                    print(f'Is reply - {referencedText}')
-                except:
-                    try:
-                        # Fetch for post
-                        referencedText = referencedTweet.data.text.replace("@smolquote", "")
-                        taggedPerson = referencedTweet[1]['users'][0].username
-                        print(f'Is post - {referencedText}')
-                    except:
-                        try:
-                            # Fetch for retweet
-                            referencedText = referencedTweet[1]['tweets'][0].text
-                            taggedPerson = referencedTweet[1]['users'][0].username
-                            print(f'Is retweet, close - {referencedText}')
-                            return
-                        except:
-                            print(f'Is not post also, raise exception')
-                            raise Exception("Not post or reply")
+                    # check if first tweet
+                    refTweetText = referencedTweet.includes["tweets"][0].text
+                    refTweetUsernames = [x.username for x in referencedTweet[1]["users"]]
+                    currentText = referencedTweet.data.text.replace(refTweetText, "")
+                    for i in refTweetUsernames:
+                        currentText = currentText.replace(i, "").strip()
 
-                newTweetText = f'“{translate(referencedText)}” - @{taggedPerson}\n\n#wassieverse'
+                    referencedText = referencedTweet[1]['tweets'][0].text
+
+                    # tag to self post
+                    if len(referencedTweet[1]['users']) == 1:
+                        taggedPerson = referencedTweet[1]['users'][0].username
+                    else:
+                        taggedPerson = referencedTweet[1]['users'][1].username
+
+                    if authorName == "smolquote":
+                        print(f'Skip, author is bot')
+                        return
+                    elif taggedPerson == "smolquote":
+                        print(f'Skip, person replied to bot')
+                        return
+                    elif "@smolquote" not in currentText:
+                        print(f'Skip, smolbot was not tagged')
+                        return
+
+                except:
+                    raise Exception(f'>>> Post is unkown: {raw_data.decode("utf-8")}')
+
+                referencedTranslated = translate(referencedText)
+                newTweetText = f'“{referencedTranslated}” - @{taggedPerson}\n\n#wassieverse'
 
                 if len(newTweetText) > 280:
-                    newTweetText = f'aw smoltext bekom too long. ~_~\n\n#wassieverse'
+                    newTweetText = f'aw smoltext haz brok ~_~'
+                elif referencedTranslated == "":
+                    newTweetText = f'tbw i kant translate noting O_o'
 
                 api.create_tweet(
                     text=newTweetText,
                     in_reply_to_tweet_id=replyID
                 )
             except Exception as err:
-                print(f'Crashed but can reply: {err}')
-                api.create_tweet(text=f'aw soz i haz crushed dunno why ~_~\n\n#wassieverse',
-                                 in_reply_to_tweet_id=replyID)
+                print(f'CRASH >>> {err}')
+
         except Exception as err:
             print(f'Something went wrong: {err}')
 
 
 stream = SmolListener()
 
-stream.add_rules(tweepy.StreamRule("(@smolquote) -filter:retweets"))
+stream.add_rules(tweepy.StreamRule("(@smolquote) filter:replies -is:retweet -is:quote"))
 stream.filter(expansions="author_id")
 
 print("Smol Quote Running...")
