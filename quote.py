@@ -1,3 +1,4 @@
+import io
 import os
 import random
 import textwrap
@@ -13,7 +14,14 @@ def get_random_img():
     return get_img(random.choice(os.listdir("quoteBgs")))
 
 
-def write_to_pic(text, tagged):
+def convert_pil_image_to_byte_array(img):
+    img_byte_array = io.BytesIO()
+    img.save(img_byte_array, format='PNG')
+    img_byte_array = img_byte_array.getvalue()
+    return img_byte_array
+
+
+def get_printed_quote(text, tagged):
     image = get_random_img()
     draw = ImageDraw.Draw(image)
     font = ImageFont.truetype("font.ttf", size=34)
@@ -38,7 +46,7 @@ def write_to_pic(text, tagged):
     w, h = draw.textsize(tagged, font=font)
     draw.text(((W - w + S) / 2, current_h + 1.5 * h + S / 2), tagged, font=font)
     # image.save("quoteBgs/test.png")
-    return image
+    return convert_pil_image_to_byte_array(image)
 
 # resize
 # exit(0)

@@ -1,3 +1,4 @@
+import asyncio
 import csv
 import json
 import os
@@ -5,6 +6,8 @@ import re
 
 import tweepy
 from dotenv import load_dotenv
+
+from quote import get_printed_quote
 
 load_dotenv()
 
@@ -31,10 +34,23 @@ def translate(sentence):
     ).strip().replace("imp", "inp")
 
 
+auth = tweepy.OAuth1UserHandler(consumer_key=os.environ.get("API_KEY"),
+                                consumer_secret=os.environ.get("API_SECRET"),
+                                access_token=os.environ.get("ACCESS_TOKEN"),
+                                access_token_secret=os.environ.get("ACCESS_TOKEN_SECRET"))
+
+apiV1 = tweepy.API(auth)
+
 api = tweepy.Client(consumer_key=os.environ.get("API_KEY"),
                     consumer_secret=os.environ.get("API_SECRET"),
                     access_token=os.environ.get("ACCESS_TOKEN"),
                     access_token_secret=os.environ.get("ACCESS_TOKEN_SECRET"))
+
+
+async def sendImage(api, apiV1, newTweetText, taggedPerson, replyID):
+    img = get_printed_quote(newTweetText, taggedPerson)
+    media = apiV1.simple_upload(filename="smolquote.png", file=bytearray(img))
+    response = api.create_tweet(text="#wassieverse", media_ids=[media.media_id], in_reply_to_tweet_id=replyID)
 
 
 class SmolListener(tweepy.StreamingClient):
@@ -84,17 +100,16 @@ class SmolListener(tweepy.StreamingClient):
                     raise Exception(f'>>> Post is unkown: {raw_data.decode("utf-8")}')
 
                 referencedTranslated = translate(referencedText)
-                newTweetText = f'“{referencedTranslated}” - @{taggedPerson}\n\n#wassieverse'
+                newTweetText = f'“{referencedTranslated}”'
 
-                if len(newTweetText) > 280:
-                    newTweetText = f'aw smoltext haz brok, too lonk text ~_~'
-                elif referencedTranslated == "":
+                if referencedTranslated == "":
                     newTweetText = f'tbw i kant translate noting O_o'
-
-                api.create_tweet(
-                    text=newTweetText,
-                    in_reply_to_tweet_id=replyID
-                )
+                    api.create_tweet(
+                        text=newTweetText,
+                        in_reply_to_tweet_id=replyID
+                    )
+                else:
+                    asyncio.run(sendImage(api, apiV1, newTweetText, taggedPerson, replyID))
             except Exception as err:
                 print(f'CRASH >>> {err}')
 
