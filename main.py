@@ -87,7 +87,7 @@ class SmolListener(tweepy.StreamingClient):
                 newTweetText = f'“{referencedTranslated}” - @{taggedPerson}\n\n#wassieverse'
 
                 if len(newTweetText) > 280:
-                    newTweetText = f'aw smoltext haz brok ~_~'
+                    newTweetText = f'aw smoltext haz brok, too lonk text ~_~'
                 elif referencedTranslated == "":
                     newTweetText = f'tbw i kant translate noting O_o'
 

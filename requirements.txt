@@ -1,3 +1,4 @@
 # Dependencies for generating/publishing Python binaries.
 tweepy==4.10.0
 python-dotenv==0.20.0
+nider==0.5.0

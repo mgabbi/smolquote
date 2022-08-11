@@ -14,7 +14,7 @@ def get_random_img():
 
 
 def write_to_pic(img, text):
-    font = ImageFont.truetype("font.ttf", size=48)
+    font = ImageFont.truetype("font.ttf", size=36)
     editable = ImageDraw.Draw(img)
     W, H = 1280, 720
 
@@ -25,8 +25,8 @@ def write_to_pic(img, text):
     len = editable.textlength(text, font=font, )
 
     start = offset = 128
-    for line in textwrap.wrap(text, width=20):
-        editable.text((start, offset), line, font=font, fill="#FFF", align="center")
+    for line in textwrap.wrap(text, width=30):
+        editable.text((start, offset), line, font=font, fill="#FFF", align="right")
         offset += font.getsize(line)[1] + 10
 
     # editable.text()
@@ -35,7 +35,8 @@ def write_to_pic(img, text):
 
 img = get_random_img()
 write_to_pic(img,
-             "WASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUPWASSUP")
+             "If you're visiting this page, you're likely here because you're searching for a random sentence. Sometimes a random word just isn't enough, and that is where the random sentence generator comes into play. By inputting the desired number, you can make a list of as many random sentences as you want or need")
+
 # resize
 exit(0)
 for image_path in os.listdir("bgs"):
