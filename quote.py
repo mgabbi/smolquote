@@ -13,29 +13,34 @@ def get_random_img():
     return get_img(random.choice(os.listdir("quoteBgs")))
 
 
-def write_to_pic(img, text):
-    font = ImageFont.truetype("font.ttf", size=36)
-    editable = ImageDraw.Draw(img)
-    W, H = 1280, 720
+def write_to_pic(text, tagged):
+    image = get_random_img()
+    draw = ImageDraw.Draw(image)
+    font = ImageFont.truetype("font.ttf", size=34)
+    para = textwrap.wrap(text, width=30)
 
-    box = editable.textbbox((W / 2, H / 2), text, font=font, align="center")
+    S, W = 80, 640
 
-    editable.rectangle((128, 128, 720, 592))
+    draw.rectangle((S, S, W, W))
 
-    len = editable.textlength(text, font=font, )
+    current_h, pad = S + 10, 10
 
-    start = offset = 128
-    for line in textwrap.wrap(text, width=30):
-        editable.text((start, offset), line, font=font, fill="#FFF", align="right")
-        offset += font.getsize(line)[1] + 10
+    current_h += current_h * (11 - len(para)) / 3
 
-    # editable.text()
-    img.save("quoteBgs/test.png")
+    for line in para:
+        w, h = draw.textlength(line, font=font)
+        draw.text(((W - w + S) / 2, current_h + S / 2), line, font=font)
+        current_h += h + pad
+
+    w, h = draw.textsize(tagged, font=font)
+    draw.text(((W - w + S) / 2, current_h + h + S / 2), tagged, font=font)
+    image.save("quoteBgs/test.png")
 
 
 img = get_random_img()
-write_to_pic(img,
-             "If you're visiting this page, you're likely here because you're searching for a random sentence. Sometimes a random word just isn't enough, and that is where the random sentence generator comes into play. By inputting the desired number, you can make a list of as many random sentences as you want or need")
+write_to_pic(
+    "If you're visiting this page, you're likely here because you're searching for a random sentence. Sometimes a random word just isn't enough, and that is where the random sentence generator comes into play. By inputting the desir ",
+    "@ravenFTX")
 
 # resize
 exit(0)
