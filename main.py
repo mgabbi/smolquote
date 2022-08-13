@@ -26,7 +26,7 @@ for x in jsonLang:
 def translate(sentence):
     linksRemoved = [
         re.sub(
-            "(@[A-Za-z0-9]+)|([^0-9A-Za-z #\n\'])|(\w+:\/\/\S+)|(www.\S+)",
+            "([^0-9A-Za-z #\n\'])|(\w+:\/\/\S+)|(www.\S+)",
             '',
             x).lower() for x in sentence.split(sep=" ")]
     return " ".join(
@@ -108,6 +108,8 @@ class SmolListener(tweepy.StreamingClient):
                         text=newTweetText,
                         in_reply_to_tweet_id=replyID
                     )
+                elif referencedTranslated == "#wassieverse":
+                    return
                 else:
                     asyncio.run(sendImage(api, apiV1, newTweetText, f'@{taggedPerson}', replyID))
             except Exception as err:
